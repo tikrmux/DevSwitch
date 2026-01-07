@@ -53,6 +53,10 @@
 
     <!-- Short summary for the plugin shown in the plugins list -->
     <change-notes><![CDATA[
+    <h3>1.0.1</h3>
+    <ul>
+        <li>Fixed IDE compatibility (since-build 231)</li>
+    </ul>
     <h3>1.0.0</h3>
     <ul>
         <li>Initial release</li>
@@ -64,6 +68,8 @@
 
     <!-- Product and plugin compatibility requirements.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <idea-version since-build="231"/>
+
     <depends>com.intellij.modules.platform</depends>
 
     <!-- Extension points defined by the plugin.
