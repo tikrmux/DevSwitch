@@ -1,0 +1,18 @@
+[versions]
+kotlin = "2.1.0"
+dokka = "2.0.0"
+intellij-platform = "2.2.1"
+compose-jetbrains = "1.7.3"
+coroutines = "1.10.1"
+ddmlib = "26.5.0"
+
+[libraries]
+coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "coroutines" }
+ddmlib = { module = "com.android.tools.ddms:ddmlib", version.ref = "ddmlib" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+intellij-platform = { id = "org.jetbrains.intellij.platform", version.ref = "intellij-platform" }
+compose-jetbrains = { id = "org.jetbrains.compose", version.ref = "compose-jetbrains" }
+compose-plugin = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

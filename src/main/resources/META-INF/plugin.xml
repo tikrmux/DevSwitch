@@ -1,0 +1,78 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>com.tinkrmux.DevSwitch</id>
+
+    <!-- Public plugin name should be written in Title Case.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
+    <name>DevSwitch</name>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor email="admin@tinkrmux.com" url="https://tinkrmux.com">tinkrmux</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+    <description><![CDATA[
+    <h2>DevSwitch - Android Developer Settings Control</h2>
+    <p>Quickly toggle Android developer settings on connected devices directly from your IDE.</p>
+
+    <h3>Features</h3>
+    <ul>
+        <li><b>Quick Access</b> - Control developer options without leaving your IDE</li>
+        <li><b>Real-time Device Detection</b> - Automatically detects connected Android devices via ADB</li>
+        <li><b>One-Click Toggles</b> - Enable/disable developer settings with a single click</li>
+        <li><b>Multi-Device Support</b> - Switch between multiple connected devices seamlessly</li>
+        <li><b>Auto-Refresh</b> - Settings automatically sync with device state</li>
+    </ul>
+
+    <h3>Supported Settings</h3>
+    <ul>
+        <li><b>Toggle Controls:</b></li>
+        <ul>
+            <li>WiFi - Enable/disable WiFi</li>
+            <li>Mobile Data - Enable/disable mobile data</li>
+            <li>Show Layout Bounds - Display view boundaries</li>
+            <li>Profile GPU Rendering - Show HWUI visual bars</li>
+            <li>Show Taps - Display touch feedback on screen</li>
+            <li>Stay Awake - Keep screen on while charging</li>
+            <li>Show FPS - Display frame rate overlay</li>
+        </ul>
+        <li><b>Range Controls:</b></li>
+        <ul>
+            <li>Animation Scale - Adjust window/transition/animator duration (1x-10x)</li>
+            <li>Refresh Rate - Change display refresh rate (FPS)</li>
+        </ul>
+    </ul>
+
+    <h3>Usage</h3>
+    <p>Open the <b>DevSwitch</b> tool window from the right sidebar, select your device, and start toggling settings!</p>
+
+    <p><em>Requires ADB and a connected Android device with Developer Options enabled.</em></p>
+  ]]></description>
+
+    <!-- Short summary for the plugin shown in the plugins list -->
+    <change-notes><![CDATA[
+    <h3>1.0.0</h3>
+    <ul>
+        <li>Initial release</li>
+        <li>Device selection with auto-detection</li>
+        <li>Developer settings toggles</li>
+        <li>Auto-refresh functionality</li>
+    </ul>
+  ]]></change-notes>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="DevSwitch"
+                    factoryClass="com.tinkrmux.devswitch.AndroidQuickSettingsWindowFactory"
+                    anchor="right"
+                    secondary="true"/>
+
+    </extensions>
+</idea-plugin>
