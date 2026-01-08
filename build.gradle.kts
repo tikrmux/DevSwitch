@@ -27,7 +27,6 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.coroutines.swing)
     implementation(libs.ddmlib)
     
     // Use common compose desktop without OS-specific natives
@@ -43,14 +42,13 @@ dependencies {
         
         pluginVerifier()
         zipSigner()
-        instrumentationTools()
     }
 }
 
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            sinceBuild = "231"
+            sinceBuild = "241"
             untilBuild = provider { null } // No upper bound
         }
     }
@@ -59,15 +57,12 @@ intellijPlatform {
         ides {
             // IntelliJ IDEA Community
             ide(IntelliJPlatformType.IntellijIdeaCommunity, "2024.3.2")
-            ide(IntelliJPlatformType.IntellijIdeaCommunity, "2024.2.4")
             
             // IntelliJ IDEA Ultimate
             ide(IntelliJPlatformType.IntellijIdeaUltimate, "2024.3.2")
-            ide(IntelliJPlatformType.IntellijIdeaUltimate, "2024.2.4")
             
             // Android Studio
             ide(IntelliJPlatformType.AndroidStudio, "2024.2.1.12")  // Ladybug
-            ide(IntelliJPlatformType.AndroidStudio, "2024.1.2.13")  // Koala
         }
     }
 
@@ -76,13 +71,14 @@ intellijPlatform {
     }
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 tasks {
     withType<JavaCompile> {
         sourceCompatibility = "17"
         targetCompatibility = "17"
-    }
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "17"
     }
 }
 
@@ -125,7 +121,7 @@ tasks.withType<DokkaTask>().configureEach {
             externalDocumentationLink {
                 url.set(URL("https://kotlinlang.org/api/core/kotlin-stdlib/"))
                 packageListUrl.set(
-                    rootProject.projectDir.resolve("stdlib.package.list").toURL()
+                    rootProject.projectDir.resolve("stdlib.package.list").toURI().toURL()
                 )
             }
 
@@ -167,7 +163,7 @@ publishing {
     repositories {
         maven {
             name = "local"
-            url = uri("${rootProject.buildDir}/repo")
+            url = uri(rootProject.layout.buildDirectory.dir("repo"))
         }
         mavenLocal()
     }
