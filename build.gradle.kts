@@ -27,7 +27,6 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.coroutines.swing)
     implementation(libs.ddmlib)
     
     // Use common compose desktop without OS-specific natives
@@ -43,14 +42,13 @@ dependencies {
         
         pluginVerifier()
         zipSigner()
-        instrumentationTools()
     }
 }
 
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            sinceBuild = "231"
+            sinceBuild = "241"
             untilBuild = provider { null } // No upper bound
         }
     }
@@ -76,13 +74,14 @@ intellijPlatform {
     }
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 tasks {
     withType<JavaCompile> {
         sourceCompatibility = "17"
         targetCompatibility = "17"
-    }
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = "17"
     }
 }
 
@@ -125,7 +124,7 @@ tasks.withType<DokkaTask>().configureEach {
             externalDocumentationLink {
                 url.set(URL("https://kotlinlang.org/api/core/kotlin-stdlib/"))
                 packageListUrl.set(
-                    rootProject.projectDir.resolve("stdlib.package.list").toURL()
+                    rootProject.projectDir.resolve("stdlib.package.list").toURI().toURL()
                 )
             }
 
@@ -167,7 +166,7 @@ publishing {
     repositories {
         maven {
             name = "local"
-            url = uri("${rootProject.buildDir}/repo")
+            url = uri(rootProject.layout.buildDirectory.dir("repo"))
         }
         mavenLocal()
     }
