@@ -13,7 +13,7 @@ plugins {
 }
 
 group = "com.tinkrmux.devswitch"
-version = "1.0.1"
+version = "1.0.2"
 
 repositories {
     mavenCentral()
@@ -29,7 +29,14 @@ repositories {
 dependencies {
     implementation(libs.coroutines.swing)
     implementation(libs.ddmlib)
-    implementation(compose.desktop.currentOs)
+    
+    // Use common compose desktop without OS-specific natives
+    // The IDE runtime provides the necessary Skia libraries
+    implementation(compose.desktop.common)
+    implementation(compose.material)
+    implementation(compose.ui)
+    implementation(compose.foundation)
+    implementation(compose.runtime)
 
     intellijPlatform {
         intellijIdeaCommunity("2024.1.7")
@@ -50,9 +57,17 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            ide(IntelliJPlatformType.IntellijIdeaCommunity, "2024.1.7")
-            ide(IntelliJPlatformType.IntellijIdeaCommunity, "2024.2.4")
+            // IntelliJ IDEA Community
             ide(IntelliJPlatformType.IntellijIdeaCommunity, "2024.3.2")
+            ide(IntelliJPlatformType.IntellijIdeaCommunity, "2024.2.4")
+            
+            // IntelliJ IDEA Ultimate
+            ide(IntelliJPlatformType.IntellijIdeaUltimate, "2024.3.2")
+            ide(IntelliJPlatformType.IntellijIdeaUltimate, "2024.2.4")
+            
+            // Android Studio
+            ide(IntelliJPlatformType.AndroidStudio, "2024.2.1.12")  // Ladybug
+            ide(IntelliJPlatformType.AndroidStudio, "2024.1.2.13")  // Koala
         }
     }
 
