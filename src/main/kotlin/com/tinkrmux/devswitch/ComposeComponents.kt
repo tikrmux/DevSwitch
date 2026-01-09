@@ -1,24 +1,21 @@
 package com.tinkrmux.devswitch
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposePanel
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.android.ddmlib.IDevice
 import kotlinx.coroutines.launch
-import java.awt.BorderLayout
+import org.jetbrains.jewel.foundation.theme.JewelTheme
+import org.jetbrains.jewel.ui.component.*
 import java.io.File
-import javax.swing.JPanel
 
 /**
  * Finds the ADB executable path by checking multiple sources in order:
@@ -73,16 +70,6 @@ private fun findAdbPath(): String {
     return adbExecutable
 }
 
-fun createQuickSettingsUI(): JPanel {
-    return JPanel().apply {
-        layout = BorderLayout()
-
-        ComposePanel()
-            .apply { setContent { QuickSettingsPlugin() } }
-            .also { add(it, BorderLayout.CENTER) }
-    }
-}
-
 @Composable
 fun ControllerProvider(controller: Controller, content: @Composable () -> Unit) {
     CompositionLocalProvider(LocalController provides controller) {
@@ -91,24 +78,24 @@ fun ControllerProvider(controller: Controller, content: @Composable () -> Unit) 
 }
 
 @Composable
-@Preview
 fun QuickSettingsPlugin() {
-    QuickSettingsTheme {
+    DevSwitchTheme {
         val scrollState = rememberScrollState()
         val controller by remember {
             mutableStateOf(Controller().apply { initExtensions() })
         }
 
         ControllerProvider(controller) {
-            Scaffold(
-                topBar = {
-                    DeviceSelectorWithAutoRefresh()
-                }
-            ) {
-                Box(
+            Column(modifier = Modifier.fillMaxSize()) {
+                // Top bar with device selector
+                DeviceSelectorWithAutoRefresh()
+                
+                // Scrollable content
+                Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState)
+                        .padding(8.dp)
                 ) {
                     ControllerStates()
                 }
@@ -117,6 +104,7 @@ fun QuickSettingsPlugin() {
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DeviceSelectorWithAutoRefresh() {
     val controller = LocalController.current
@@ -146,53 +134,43 @@ fun DeviceSelectorWithAutoRefresh() {
         }
     }
 
-    Row(
+    FlowRow(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+            .padding(horizontal = 8.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Box(modifier = Modifier) {
-            OutlinedButton(onClick = { isDropdownExpanded = true }) {
-                PluginText(
-                    text = controller.selectedDevice?.name ?: "No device",
-                    maxLines = 1,
-                )
-            }
-            DropdownMenu(
-                expanded = isDropdownExpanded,
-                onDismissRequest = { isDropdownExpanded = false }
-            ) {
+        // Device dropdown
+        Dropdown(
+            modifier = Modifier.widthIn(min = 120.dp, max = 150.dp),
+            menuContent = {
                 availableDevices.forEach { device ->
-                    DropdownMenuItem(
-                        onClick = {
-                            isDropdownExpanded = false
-                            controller.selectedDevice = device
-                        }
+                    selectableItem(
+                        selected = device == controller.selectedDevice,
+                        onClick = { controller.selectedDevice = device }
                     ) {
-                        PluginText(text = device.name, maxLines = 1)
+                        Text(device.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
+        ) {
+            Text(
+                text = controller.selectedDevice?.name ?: "No device",
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Box(
-            modifier = Modifier
-                .width(2.dp)
-                .height(24.dp)
-                .background(Color.Gray, shape = CircleShape)
-        )
-
-        Checkbox(
-            checked = controller.autoRefreshEnabled,
-            enabled = autoRefreshEnabledNoDevice,
-            onCheckedChange = { controller.autoRefreshEnabled = it }
-        )
-
-        PluginText(text = "Auto Refresh")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = controller.autoRefreshEnabled,
+                onCheckedChange = { controller.autoRefreshEnabled = it },
+                enabled = autoRefreshEnabledNoDevice
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text("Auto Refresh", maxLines = 1)
+        }
     }
 }
 
@@ -221,11 +199,23 @@ fun ToggleActionComponent(
     val enabled by remember { derivedStateOf { controller.selectedDevice != null } }
 
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = enabled) { onValueChanged(!value) }
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Checkbox(checked = value, onCheckedChange = onValueChanged, enabled = enabled)
-        PluginText(text)
+        Checkbox(
+            checked = value,
+            onCheckedChange = { onValueChanged(it) },
+            enabled = enabled
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
@@ -322,36 +312,34 @@ fun RangeActionComponent(
 ) {
     val controller = LocalController.current
     val enabled by remember { derivedStateOf { controller.selectedDevice != null } }
-    var expanded by remember { mutableStateOf(false) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start,
-        modifier = Modifier.padding(horizontal = 16.dp)
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
-        PluginText(text)
-        Spacer(modifier = Modifier.width(16.dp))
-        Box(modifier = Modifier.weight(1f)) {
-            OutlinedButton(
-                onClick = { expanded = enabled },
-                modifier = Modifier.wrapContentSize()
-            ) {
-                PluginText(text = selectedOption, maxLines = 1)
-            }
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
+        Text(
+            text = text,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        
+        Dropdown(
+            enabled = enabled,
+            menuContent = {
                 options.forEach { option ->
-                    DropdownMenuItem(onClick = {
-                        expanded = false
-                        onSelected(option)
-                    }) {
-                        PluginText(text = option, maxLines = 1)
+                    selectableItem(
+                        selected = option == selectedOption,
+                        onClick = { onSelected(option) }
+                    ) {
+                        Text(option, maxLines = 1)
                     }
                 }
             }
+        ) {
+            Text(selectedOption, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
     }
 }
@@ -389,19 +377,5 @@ fun FpsScale() {
         options = options,
         selectedOption = state,
         onSelected = { controller.changeFpsScale(it) },
-    )
-}
-
-@Composable
-fun PluginText(
-    text: String,
-    modifier: Modifier = Modifier,
-    maxLines: Int = 2
-) {
-    Text(
-        text = text,
-        maxLines = maxLines,
-        overflow = TextOverflow.Ellipsis,
-        modifier = modifier
     )
 }

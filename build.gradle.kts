@@ -13,13 +13,14 @@ plugins {
 }
 
 group = "com.tinkrmux.devswitch"
-version = "1.0.2"
+version = "1.0.3"
 
 repositories {
     mavenCentral()
     mavenLocal()
     google()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    maven("https://packages.jetbrains.team/maven/p/kpm/public/")  // Jewel repository
 
     intellijPlatform {
         defaultRepositories()
@@ -29,40 +30,54 @@ repositories {
 dependencies {
     implementation(libs.ddmlib)
     
-    // Use common compose desktop without OS-specific natives
-    // The IDE runtime provides the necessary Skia libraries
-    implementation(compose.desktop.common)
-    implementation(compose.material)
-    implementation(compose.ui)
-    implementation(compose.foundation)
-    implementation(compose.runtime)
+    // Jewel IDE LaF Bridge for platform 243
+    // Exclude kotlinx.coroutines - provided by the IDE
+    implementation("org.jetbrains.jewel:jewel-ide-laf-bridge-243:0.27.0") {
+        exclude(group = "org.jetbrains.kotlinx")
+    }
+    
+    // Coroutines - compile only (IDE provides at runtime)
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+    
+    // Skiko natives - required for Compose rendering
+    implementation("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:0.8.18")
+    implementation("org.jetbrains.skiko:skiko-awt-runtime-macos-x64:0.8.18")
+    implementation("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:0.8.18")
+    implementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:0.8.18")
 
     intellijPlatform {
-        intellijIdeaCommunity("2024.1.7")
+        intellijIdeaCommunity("2024.3.2")  // Platform 243
         
         pluginVerifier()
         zipSigner()
     }
 }
 
+// Exclude kotlinx.coroutines from runtime - IDE provides it
+configurations.runtimeClasspath {
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-core-jvm")
+    exclude(group = "org.jetbrains.kotlinx", module = "kotlinx-coroutines-jdk8")
+}
+
 intellijPlatform {
     pluginConfiguration {
         ideaVersion {
-            sinceBuild = "241"
+            sinceBuild = "243"  // Platform 243+ required for bundled Jewel
             untilBuild = provider { null } // No upper bound
         }
     }
 
     pluginVerification {
         ides {
-            // IntelliJ IDEA Community
+            // IntelliJ IDEA Community (243+)
             ide(IntelliJPlatformType.IntellijIdeaCommunity, "2024.3.2")
             
-            // IntelliJ IDEA Ultimate
+            // IntelliJ IDEA Ultimate (243+)
             ide(IntelliJPlatformType.IntellijIdeaUltimate, "2024.3.2")
             
-            // Android Studio
-            ide(IntelliJPlatformType.AndroidStudio, "2024.2.1.12")  // Ladybug
+            // Android Studio Meerkat (243+)
+            ide(IntelliJPlatformType.AndroidStudio, "2024.3.1.13")
         }
     }
 
