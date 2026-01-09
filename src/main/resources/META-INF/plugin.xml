@@ -78,7 +78,8 @@
         <toolWindow id="DevSwitch"
                     factoryClass="com.tinkrmux.devswitch.AndroidQuickSettingsWindowFactory"
                     anchor="right"
-                    secondary="true"/>
+                    secondary="true"
+                    icon="/icons/devswitch.svg"/>
 
     </extensions>
 </idea-plugin>

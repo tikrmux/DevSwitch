@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13">
+  <!-- Rounded square outline -->
+  <rect x="1" y="1" width="11" height="11" rx="2.5" ry="2.5" fill="none" stroke="#CED0D6" stroke-width="1"/>
+  <!-- Toggle track -->
+  <rect x="2.5" y="4.5" width="8" height="4" rx="2" ry="2" fill="none" stroke="#CED0D6" stroke-width="1"/>
+  <!-- Toggle knob (on position) -->
+  <circle cx="8.5" cy="6.5" r="1.5" fill="#CED0D6"/>
+</svg>

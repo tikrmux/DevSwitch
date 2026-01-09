@@ -114,6 +114,13 @@ fun DeviceSelectorWithAutoRefresh() {
     var availableDevices by remember { mutableStateOf(emptyList<IDevice>()) }
     val autoRefreshEnabledNoDevice by remember { derivedStateOf { controller.selectedDevice != null } }
 
+    // Stop auto-refresh when tool window is hidden (composable leaves composition)
+    DisposableEffect(Unit) {
+        onDispose {
+            controller.stopAutoRefresh()
+        }
+    }
+
     LaunchedEffect(Unit) {
         coroutineScope.launch {
             adbDeviceManager.devices.collect { devices ->

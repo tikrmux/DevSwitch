@@ -66,6 +66,44 @@ intellijPlatform {
             sinceBuild = "243"  // Platform 243+ required for bundled Jewel
             untilBuild = provider { null } // No upper bound
         }
+        
+        // Extract changelog for current version
+        changeNotes = provider {
+            val changelog = file("CHANGELOG.md").readText()
+            val ver = version.toString()
+            
+            // Find the start of this version's section
+            val versionHeader = "## [$ver]"
+            val startIndex = changelog.indexOf(versionHeader)
+            
+            if (startIndex == -1) {
+                "See CHANGELOG.md for details"
+            } else {
+                // Find the next version header or end of file
+                val contentStart = changelog.indexOf("\n", startIndex) + 1
+                val nextVersionIndex = changelog.indexOf("\n## [", contentStart)
+                val content = if (nextVersionIndex == -1) {
+                    changelog.substring(contentStart)
+                } else {
+                    changelog.substring(contentStart, nextVersionIndex)
+                }.trim()
+                
+                // Convert markdown to simple HTML
+                buildString {
+                    append("<ul>")
+                    content.lines().forEach { line ->
+                        when {
+                            line.startsWith("### ") -> append("<h3>${line.removePrefix("### ")}</h3>")
+                            line.startsWith("- **") -> append("<li><b>${line.removePrefix("- **").replace("**:", ":</b>").replace("**", "</b>")}</li>")
+                            line.startsWith("- ") -> append("<li>${line.removePrefix("- ")}</li>")
+                            line.startsWith("  - ") -> append("<li>&nbsp;&nbsp;${line.removePrefix("  - ")}</li>")
+                            line.isNotBlank() -> append("<p>$line</p>")
+                        }
+                    }
+                    append("</ul>")
+                }
+            }
+        }
     }
 
     pluginVerification {
