@@ -29,6 +29,7 @@ repositories {
 
 dependencies {
     implementation(libs.ddmlib)
+    implementation(libs.gson)
     
     // Jewel IDE LaF Bridge for platform 243
     // Exclude kotlinx.coroutines - provided by the IDE

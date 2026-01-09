@@ -4,9 +4,11 @@ dokka = "2.0.0"
 intellij-platform = "2.10.5"
 compose-jetbrains = "1.7.3"
 ddmlib = "26.5.0"
+gson = "2.10.1"
 
 [libraries]
 ddmlib = { module = "com.android.tools.ddms:ddmlib", version.ref = "ddmlib" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

@@ -80,6 +80,9 @@
                     anchor="right"
                     secondary="true"
                     icon="/icons/devswitch.svg"/>
-
+        
+        <notificationGroup id="DevSwitch Notifications"
+                          displayType="BALLOON"
+                          toolWindowId="DevSwitch"/>
     </extensions>
 </idea-plugin>
