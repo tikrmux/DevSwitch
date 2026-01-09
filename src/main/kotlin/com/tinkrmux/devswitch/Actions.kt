@@ -145,16 +145,27 @@ class FpsScaleAction : RangeAction() {
     private companion object {
         const val DUMPSYS_DISPLAY = "dumpsys display"
         val displayModeRegex = """DisplayMode\{.*? vsyncRate=([\d.]+)""".toRegex()
-        val currentDisplayMode = """mActiveSfDisplayMode=DisplayMode\{.*? vsyncRate=([\d.]+)""".toRegex()
     }
 
+    // Cache the available refresh rates (only fetched once per device)
+    private var cachedRanges: List<String>? = null
+    private var lastDevice: IDevice? = null
+
     override suspend fun getRange(device: IDevice): List<String> {
+        // Return cached if same device
+        if (device == lastDevice && cachedRanges != null) {
+            return cachedRanges!!
+        }
+        
+        // dumpsys is only called once to get available modes
         val dumpsysOutput = device.executeShellCommand(DUMPSYS_DISPLAY)
-        return displayModeRegex.findAll(dumpsysOutput)
+        cachedRanges = displayModeRegex.findAll(dumpsysOutput)
             .mapNotNull { match -> match.groupValues.getOrNull(1)?.toDoubleOrNull() }
             .map { round(it).toString() }
             .toSet()
             .toList()
+        lastDevice = device
+        return cachedRanges!!
     }
 
     override suspend fun setValue(device: IDevice, value: String) {
@@ -163,12 +174,14 @@ class FpsScaleAction : RangeAction() {
     }
 
     override suspend fun getValue(device: IDevice): String {
-        val dumpsysOutput = device.executeShellCommand(DUMPSYS_DISPLAY)
-        return currentDisplayMode.find(dumpsysOutput)
-            ?.groupValues
-            ?.getOrNull(1)
-            ?.toDoubleOrNull()
-            ?.run { round(this) }
-            ?.toString() ?: "-"
+        // Use settings get instead of dumpsys - much faster
+        val peakRate = device.executeShellCommand("settings get system peak_refresh_rate").trim()
+        
+        // Some devices return "null" when not explicitly set - show as Default
+        if (peakRate == "null" || peakRate.isEmpty()) {
+            return "Default"
+        }
+        
+        return peakRate.toDoubleOrNull()?.run { round(this).toString() } ?: "Default"
     }
 }

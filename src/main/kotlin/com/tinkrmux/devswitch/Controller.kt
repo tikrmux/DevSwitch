@@ -5,12 +5,15 @@ package com.tinkrmux.devswitch
 import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.Snapshot
 import com.android.ddmlib.IDevice
+import com.intellij.ide.util.PropertiesComponent
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 val LocalController = compositionLocalOf<Controller> {
     error("No controller provided")
 }
+
+private const val AUTO_REFRESH_KEY = "com.tinkrmux.devswitch.autoRefreshEnabled"
 
 class Controller : CoroutineScope {
 
@@ -28,8 +31,17 @@ class Controller : CoroutineScope {
 
     var selectedDevice by mutableStateOf<IDevice?>(null)
 
-    // auto refresh
-    var autoRefreshEnabled by mutableStateOf(true)
+    // auto refresh - persisted
+    private val _autoRefreshEnabled = mutableStateOf(
+        PropertiesComponent.getInstance().getBoolean(AUTO_REFRESH_KEY, true)
+    )
+    var autoRefreshEnabled: Boolean
+        get() = _autoRefreshEnabled.value
+        set(value) {
+            _autoRefreshEnabled.value = value
+            PropertiesComponent.getInstance().setValue(AUTO_REFRESH_KEY, value, true)
+        }
+    
     private var autoRefreshJob: Job? = null
 
     fun startAutoRefresh() {
